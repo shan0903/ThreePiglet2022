@@ -1,8 +1,14 @@
 # ThreePiglet2022
 
-*Note. All the data files and the script files should be saved in the same directory.
+Data used in Xu S., Song Y., and Liu J., (under review) "The development of spatial cognition and its malleability assessed in mass population via a mobile game":
 
-*Note. The paths in the GET DATA commands in the .sps files (see comments) need to be changed to the directory containing the scripts.
+Online game-based assessment: Data.csv
+
+Download: https://drive.google.com/file/d/1P2OdiZe-U5gnQby6oXMjVuNYrMEbZZP1/view?usp=sharing
+
+Pen-and-paper assessment: schoolMR.sav
+
+Download: 
 
 1. Participants and trial counts in Methods-participants:
 
@@ -10,9 +16,13 @@ Use Data.csv and run script 01.txt in python environment
 
 Download:
 
-Google Drive: https://drive.google.com/file/d/1P2OdiZe-U5gnQby6oXMjVuNYrMEbZZP1/view?usp=sharing
 
-Save the data and the script in the same directory.
+
+Instruction for analysis replication:
+
+*Note. All the data files and the script files should be saved in the same directory.
+
+*Note. The paths in the GET DATA commands in the .sps files (see comments) need to be changed to the directory containing the scripts.
 
 __________________
 2-3.The developmental trajectory of mental rotation ability: 
