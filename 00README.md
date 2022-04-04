@@ -8,21 +8,22 @@ Download: https://drive.google.com/file/d/1P2OdiZe-U5gnQby6oXMjVuNYrMEbZZP1/view
 
 Pen-and-paper assessment: schoolMR.sav
 
-Download: 
-
-1. Participants and trial counts in Methods-participants:
-
-Use Data.csv and run script 01.txt in python environment
-
-Download:
-
+Download: https://github.com/shan0903/ThreePiglets2022/blob/main/schoolMR.sav
+____________________________
 
 
 Instruction for analysis replication:
 
+
 *Note. All the data files and the script files should be saved in the same directory.
 
 *Note. The paths in the GET DATA commands in the .sps files (see comments) need to be changed to the directory containing the scripts.
+
+——————————————————————————————
+
+1. Participants and trial counts in Methods-participants:
+
+Use Data.csv and run script 01.txt in python environment。
 
 __________________
 2-3.The developmental trajectory of mental rotation ability: 
