@@ -2,6 +2,9 @@
 
 1. Participants and trial counts in Methods-participants: 
 Use Data.csv and run script 01.txt in python environment
+Download:
+Google Drive: https://drive.google.com/file/d/1P2OdiZe-U5gnQby6oXMjVuNYrMEbZZP1/view?usp=sharing
+Save the data and the script in the same directory.
 
 2-3.The developmental trajectory of mental rotation ability: 
 Run script 02.txt in python environment.
