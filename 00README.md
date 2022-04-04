@@ -19,7 +19,7 @@ Instruction for analysis replication:
 
 *Note. The paths in the GET DATA commands in the .sps files (see comments) need to be changed to the directory containing the scripts.
 
-————————————————————————————————
+——————————————————————————————————————————————————————————
 
 1. Participants and trial counts in Methods-participants:
 
