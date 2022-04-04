@@ -1,0 +1,29 @@
+import pandas as pd
+import numpy as np
+import os
+import scipy
+import copy
+from scipy import optimize
+import matplotlib.pyplot as plt
+    
+dat = pd.read_excel('schoolMR.xlsx')
+Age = list(dat['age'])
+mirror3 = list(dat['ZRE_mNm3'])
+mirror2 = list(dat['ZRE_mNm2'])
+
+def ErrorFunc (x0,y0,k1,k2,x,y):
+    return piecewise_linear(x,x0,y0,k1,k2)-y
+
+
+#fitting the mirror-image discrimination score of the school sample with spline regression by curve_fit 
+def piecewise_linear(x,x0,y0,k1,k2):
+    return np.piecewise(x,[x<x0],[lambda x:k1*x + y0-k1*x0,lambda x:k2*x + y0-k2*x0])
+agenp = np.array(Age)
+
+p,e = optimize.curve_fit(piecewise_linear,agenp,np.array(mirror2), p0 = [9.5,0,0.1,0.1])
+print ('the turning point of 2D mirror discrimination is ',p[0])
+
+p,e = optimize.curve_fit(piecewise_linear,agenp,np.array(mirror3), p0 = [9.5,0,0.1,0.1])
+print ('the turning point of 3D mirror discrimination is ',p[0])
+
+
