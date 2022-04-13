@@ -1,0 +1,174 @@
+
+import pandas as pd
+import numpy as np
+import os
+import scipy
+import copy
+
+#please change the directory to where the data is stored, the resultant data file will be saved to the same directory
+os.chdir('/path_to_the_data_file/')
+
+#load the data file
+dat = pd.io.api.read_csv('Data.csv')
+
+#calculate sample size
+#extract the id list of all the users, and calculate the total number of users
+sidSet = set(dat['SID'])
+sids = list(sidSet)
+totalUsers = len(sids)
+print('a total of',totalUsers,'participants played the game')
+
+#calculate the total number of users with non-zero and the number of nonzero data points
+datN0 = dat[dat['Score']!=0]
+sN0idSet = set(datN0['SID'])
+totalN0Users = len(list(sN0idSet))
+totalN0points = len(datN0)
+pointPerN0Users = totalN0points/totalN0Users
+print (totalN0Users,'of them obtained non-zero scores in at least one play')
+print (totalN0points,'non-zero data points were generated')
+print('each participants played',pointPerN0Users,'times of the game on average')
+
+#reorder the trials by labelling them according to their order in the non-zero trials of each participant, add a variable called 'reOrder' to store this order and save the new dataframe as data_reorder
+times = list(set(dat['Times'])) 
+reOrder = [0] * len(dat)
+dat.insert(7,'reOrder',reOrder)
+
+for sid in list(sN0idSet):
+    indi_dat = dat[dat['SID']==sid]
+    j = 1
+    for time in times[:len(indi_dat)]:
+        tmp = indi_dat['Score'][indi_dat['Times']==time]
+        if len(tmp) != 0: 
+            if float(tmp) != 0:
+               dat.loc[(dat['SID']==sid) & (dat['Times']==time),['reOrder']] = j
+                j += 1
+#save the dataframe with a variable indicating the order of non-zero trials of each trial for each participants, i.e. if dat_reOrder['reOrder']==1, it is the first non-zero trial of the participant whose ID is recorded in dat_reOrder['SID']
+dat_reorder = dat[dat['reOrder']!=0]
+
+#save the re-ordered data file for following analysis
+dat_reorder.to_excel('dat_reOrderNozeros_replicate.xlsx')    
+
+#counting ppl finsihing a specific number of plays         
+times_re = list(set(dat_reorder['reOrder']))
+ages = [5, 13, 18, 23, 28, 33, 38, 43, 48, 53]
+out_age_stats = []
+
+for time in times_re[:]:
+    age_stats = []
+    age_stats.append(time)
+    tmp = dat_reorder['Score'][dat_reorder['reOrder']==time]
+    N_tmp = len(tmp)
+    age_stats.append(N_tmp)
+    if N_tmp > 0:
+        grand_mean = tmp.mean()
+    else:
+        grand_mean = np.nan    
+    age_stats.append(grand_mean)
+    for age in ages:
+        if age ==53:
+            tmp = dat_reorder['Score'][dat_reorder['Age']>=age][dat_reorder['reOrder']==time]
+        else:
+            tmp = dat_reorder['Score'][dat_reorder['Age']==age][dat_reorder['reOrder']==time]
+        N_tmp = len(tmp)
+        age_stats.append(N_tmp)
+        if N_tmp > 0:
+            a_mean = tmp.mean()
+        else:
+            a_mean = np.nan    
+        age_stats.append(a_mean)
+    out_age_stats.append(age_stats)
+
+print(out_age_stats[200][1],'participants played more than 200 times')
+print(out_age_stats[500][1],'participants played more than 500 times')
+print(out_age_stats[700][1],'participants played more than 700 times')
+print(out_age_stats[1][1],'participants had valid index of performance')
+
+#size of Dev sample
+devSiz = out_age_stats[1][3]+out_age_stats[1][5]+out_age_stats[1][7]+out_age_stats[1][9]+out_age_stats[1][11]+out_age_stats[1][13]+out_age_stats[1][15]+out_age_stats[1][17]+out_age_stats[1][19]+out_age_stats[1][21]
+print('Among these participants,',devSiz,'provided age information')
+#number of participants with no less than 20 non-zero records with age information
+T20WithAgeSiz = out_age_stats[20][3]+out_age_stats[20][5]+out_age_stats[20][7]+out_age_stats[20][9]+out_age_stats[20][11]+out_age_stats[20][13]+out_age_stats[20][15]+out_age_stats[20][17]+out_age_stats[20][19]+out_age_stats[20][21]
+print(T20WithAgeSiz,'participants who had no less than 20 non-zero records and provided age information')
+#size of Training sample
+TrainingSiz = out_age_stats[20][3]+out_age_stats[20][5]+out_age_stats[20][7]+out_age_stats[20][9]+out_age_stats[20][11]+out_age_stats[20][13]
+print('the training sample, N =',TrainingSiz)
+
+# save the data corresponding to number of participants played no less than a certain amount of times (figure 1b)
+nPerPlay = out_age_stats[0:49][1]
+np.savez('nParticipants_nPlay', dat=nPerPlay)
+
+#sex composition of the development sample
+Sex = [1, 2]
+dat_reOrderM = dat_reorder[dat_reorder['Sex']==1]
+out_ageM_stats = []
+for time in times_re[:]:
+    age_stats = []
+    age_stats.append(time)
+    tmp = dat_reOrderM['Score'][dat_reOrderM['reOrder']==time]
+    N_tmp = len(tmp)
+    age_stats.append(N_tmp)
+    if N_tmp > 0:
+        grand_mean = tmp.mean()
+    else:
+        grand_mean = np.nan    
+    age_stats.append(grand_mean)
+
+    for age in ages:
+        if age ==53:
+            tmp = dat_reOrderM['Score'][dat_reOrderM['Age']>=age][dat_reOrderM['reOrder']==time]
+        else:
+            tmp = dat_reOrderM['Score'][dat_reOrderM['Age']==age][dat_reOrderM['reOrder']==time]
+        N_tmp = len(tmp)
+        age_stats.append(N_tmp)
+        if N_tmp > 0:
+            a_mean = tmp.mean()
+        else:
+            a_mean = np.nan    
+        age_stats.append(a_mean)
+    out_ageM_stats.append(age_stats)
+
+dat_reOrderF = dat_reorder[dat_reorder['Sex']==2]
+out_ageF_stats = []
+for time in times_re[:]:
+    age_stats = []
+    age_stats.append(time)
+    tmp = dat_reOrderF['Score'][dat_reOrderF['reOrder']==time]
+    N_tmp = len(tmp)
+    age_stats.append(N_tmp)
+    if N_tmp > 0:
+        grand_mean = tmp.mean()
+    else:
+        grand_mean = np.nan    
+    age_stats.append(grand_mean)
+
+    for age in ages:
+        if age ==53:
+            tmp = dat_reOrderF['Score'][dat_reOrderF['Age']>=age][dat_reOrderF['reOrder']==time]
+        else:
+            tmp = dat_reOrderF['Score'][dat_reOrderF['Age']==age][dat_reOrderF['reOrder']==time]
+        N_tmp = len(tmp)
+        age_stats.append(N_tmp)
+        if N_tmp > 0:
+            a_mean = tmp.mean()
+        else:
+            a_mean = np.nan   
+        age_stats.append(a_mean)
+    out_ageF_stats.append(age_stats)
+
+#sex composition of the development sample
+nfDev=out_ageF_stats[1][3]+out_ageF_stats[1][5]+out_ageF_stats[1][7]+out_ageF_stats[1][9]+out_ageF_stats[1][11]+out_ageF_stats[1][13]+out_ageF_stats[1][15]+out_ageF_stats[1][17]+out_ageF_stats[1][19]+out_ageF_stats[1][21]
+nmDev=out_ageM_stats[1][3]+out_ageM_stats[1][5]+out_ageM_stats[1][7]+out_ageM_stats[1][9]+out_ageM_stats[1][11]+out_ageM_stats[1][13]+out_ageM_stats[1][15]+out_ageM_stats[1][17]+out_ageM_stats[1][19]+out_ageM_stats[1][21]
+naDev = devSiz-nfDev-nmDev
+print('In the development sample there are',nfDev/devSiz*100,'% females,',nmDev/devSiz*100,'% males')
+
+#sex composition of the training sample
+nfTraining = out_ageF_stats[20][3]+out_ageF_stats[20][5]+out_ageF_stats[20][7]+out_ageF_stats[20][9]+out_ageF_stats[20][11]+out_ageF_stats[20][13]
+nmTraining = out_ageM_stats[20][3]+out_ageM_stats[20][5]+out_ageM_stats[20][7]+out_ageM_stats[20][9]+out_ageM_stats[20][11]+out_ageM_stats[20][13]
+print('In the training sample there are',nfTraining/TrainingSiz*100,'% females,',nmTraining/TrainingSiz*100,'% males')
+
+#Age composition of the development sample
+print('In the development sample there are',out_age_stats[1][3]/devSiz*100,'% of the age 0-10,',out_age_stats[1][5]/devSiz*100,'% of the age 11-15,',out_age_stats[1][7]/devSiz*100,'% of the age 16-20,',out_age_stats[1][9]/devSiz*100,'% of the age 21-25,',out_age_stats[1][11]/devSiz*100,'% of the age 26-30,')
+print(out_age_stats[1][13]/devSiz*100,'% of the age 31-35,',out_age_stats[1][15]/devSiz*100,'% of the age 36-40,',out_age_stats[1][17]/devSiz*100,'% of the age 41-45,',out_age_stats[1][19]/devSiz*100,'% of the age 46-50,',out_age_stats[1][21]/devSiz*100,'% beyond the age of 50.')
+
+#Age composition of the training sample
+print('In the training sample there are',out_age_stats[20][3]/devSiz*100,'% of the age 0-10,',out_age_stats[20][5]/devSiz*100,'% of the age 11-15,',out_age_stats[20][7]/devSiz*100,'% of the age 16-20,',out_age_stats[20][9]/devSiz*100,'% of the age 21-25,',out_age_stats[20][11]/devSiz*100,'% of the age 26-30,',out_age_stats[20][13]/devSiz*100,'% of the age 31-35')

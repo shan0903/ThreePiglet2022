@@ -1,0 +1,19 @@
+import pandas as pd
+import numpy as np
+import os
+import scipy
+import copy
+
+#please change the directory to where the data is stored, the resultant data file will be saved to the same directory
+os.chdir('/path_to_the_data_file/')
+
+#get the data of the second non-zero score
+dat_reorder = pd.read_excel('dat_reOrderNozeros_replicate.xlsx')  
+
+#select the second non-zero record of every participant in the development sample and save it into a file
+dat_tmp = dat_reorder[dat_reorder['reOrder']==2]
+dat_T2 = dat_tmp[dat_tmp['Age']>0]
+
+dat_T2.to_excel('dat_T2_replicate.xlsx')
+
+

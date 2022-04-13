@@ -1,0 +1,37 @@
+#!/usr/bin/env python
+
+import pandas as pd
+import numpy as np
+import os
+import copy
+
+#please change the directory to where the data is stored, the resultant data file will be saved to the same directory
+os.chdir('/path_to_the_data_file/')
+
+dat = pd.read_excel('dat_20modeled_replicate.xlsx')
+
+#calculate the different between the max score in the first 20 plays and the that of the second non-zero play (initial performance)
+maxin20 = [0] * len(dat)
+dat.insert(7,'maxIn20',maxin20)
+dat.insert(7,'changeIn20',maxin20)
+
+sids = list(set(dat['SID'][dat['reOrder']==21]))
+
+dat_20max = []
+i = 0
+for sid in sids:
+    indi_dat = dat[dat['SID']==sid]
+    if len(indi_dat) >=20:
+        i = i + 1
+        print (i)
+        indi_dat.loc[indi_dat['Score'].idxmax(),['maxIn20']] = 1
+        maxS = indi_dat['Score'][indi_dat['Score'].idxmax()];
+        iniS = indi_dat['Score'][indi_dat['reOrder']==2]
+        changeS = float(maxS) - float(iniS)
+        indi_dat.loc[:,['changeIn20']]=changeS
+        if i == 1:
+            dat_20max = copy.copy(indi_dat)
+        else:
+            dat_20max = dat_20max.append(indi_dat)
+    
+dat_20max.to_excel('dat_20max_replicate.xlsx')

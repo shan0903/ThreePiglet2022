@@ -1,0 +1,186 @@
+import pandas as pd
+import numpy as np
+import os
+import scipy
+import copy
+from scipy.optimize import curve_fit
+
+#please change the directory to where the data is stored, the resultant data file will be saved to the same directory
+os.chdir('/path_to_the_data_file/')
+
+#fit curve of the first 10 non-zero scores
+dat_reorder = pd.read_excel('dat_reOrderNozeros_replicate.xlsx')  
+
+sidlist = list(set(dat_reorder['SID'][dat_reorder['reOrder']==11]))
+
+T10_dat_reorder = []
+for i, sid in enumerate(sidlist):
+    if i ==0:
+        T10_dat_reorder = dat_reorder[dat_reorder['SID']==sid][dat_reorder['reOrder']<=11]
+    else:
+        T10_dat_reorder = T10_dat_reorder.append(dat_reorder[dat_reorder['SID']==sid][dat_reorder['reOrder']<=11])
+
+dat_10 = T10_dat_reorder
+dat_10modelling = []
+i = 0
+for sid in sidlist:
+    indi_dat = dat_10[(dat_10['SID']==sid)&(dat_10['reOrder']>1)&(dat_10['reOrder']<=11)]
+    if len(indi_dat) == 10:
+        i = i + 1
+        if i ==1:
+            dat_10modelling = copy.copy(indi_dat)
+        else:
+            dat_10modelling = dat_10modelling.append(indi_dat)
+
+#fitting each partcipant's data to natural logarithmic function
+def func2(x, a, b):
+    return a + b * np.log(x-1)
+    
+Nscore = [0] * len(dat_10modelling)
+dat_10modelling.insert(7,'a',Nscore)
+dat_10modelling.insert(7,'b',Nscore)
+
+xs = np.linspace(2, 11, 10)
+
+j = 0
+for sid in sidlist:
+    print (j)
+    j = j+1
+    indi_dat = dat_10modelling[dat_10modelling['SID']==sid]
+    if len(indi_dat) > 0:
+        parasln2, covarsln2 = curve_fit(func2, list(indi_dat['reOrder']), list(indi_dat['Score']))
+        ymean = np.mean(list(indi_dat['Score']))
+        for x in xs:
+            dat_10modelling.loc[(dat_10modelling['SID']==sid)&(dat_10modelling['reOrder']==x),['a']] = parasln2[0]
+            dat_10modelling.loc[(dat_10modelling['SID']==sid)&(dat_10modelling['reOrder']==x),['b']] = parasln2[1]
+
+dat_10modelling.to_excel('dat_10modeled_replicate.xlsx')
+
+#bootstrap among participants with no less than 10 plays
+dat_10_T2 = dat_10modelling[dat_10modelling['reOrder']==2]
+out_stats = []
+bss = np.linspace(0, 2499, 2500)
+
+age6 = [5,13,18,23,28,33]
+
+for bs in bss:
+    print (bs)
+    bs_stats = []
+    bs_stats.append(bs)
+    age_stats = []
+    ageB_stats = []
+    ageScore2_stats = []
+    for age in age6:
+        sumB = 0
+        sumScore2 = 0
+        BSID = []
+        BSID = list(dat_10_T2['SID'][dat_10_T2['Age']==age])
+        BSsize = len(BSID)
+        bssample = np.random.choice(BSID,BSsize)
+        for bsid in bssample:
+            sumB = sumB + float(dat_10_T2['b'][dat_10_T2['SID']==bsid])
+            sumScore2 = sumScore2 + float(dat_10_T2['Score'][dat_10_T2['SID']==bsid])
+        meanB = sumB / BSsize
+        meanScore2 = sumScore2 / BSsize
+        age_stats.append(age)
+        ageB_stats.append(meanB)
+        ageScore2_stats.append(meanScore2)
+    peakB = age_stats[ageB_stats.index(max(ageB_stats))]
+    peakScore2 = age_stats[ageScore2_stats.index(max(ageScore2_stats))]
+    bs_stats.append(peakB)
+    bs_stats.append(peakScore2)
+    out_stats.append(bs_stats)
+        
+dat_10_bs = pd.DataFrame(out_stats)   
+dat_10_bs.columns = ['order','b','score2']
+dat_10_bs.to_excel('bootstrap_10_replicate.xlsx')        
+   
+#fit curve of the first 30 non-zero scores
+sidlist = list(set(dat_reorder['SID'][dat_reorder['reOrder']==31]))
+
+T30_dat_reorder = []
+for i, sid in enumerate(sidlist):
+    if i ==0:
+        T30_dat_reorder = dat_reorder[dat_reorder['SID']==sid][dat_reorder['reOrder']<=31]
+    else:
+        T30_dat_reorder = T30_dat_reorder.append(dat_reorder[dat_reorder['SID']==sid][dat_reorder['reOrder']<=31])
+
+dat_30 = T30_dat_reorder
+dat_30modelling = []
+i = 0
+for sid in sidlist:
+    indi_dat = dat_30[(dat_30['SID']==sid)&(dat_30['reOrder']>1)&(dat_30['reOrder']<=31)]
+    if len(indi_dat) == 30:
+        i = i + 1
+        if i ==1:
+            dat_30modelling = copy.copy(indi_dat)
+        else:
+            dat_30modelling = dat_30modelling.append(indi_dat)
+
+#fitting each partcipant's data to natural logarithmic function
+
+def func2(x, a, b):
+    return a + b * np.log(x-1)
+    
+Nscore = [0] * len(dat_30modelling)
+dat_30modelling.insert(7,'a',Nscore)
+dat_30modelling.insert(7,'b',Nscore)
+
+xs = np.linspace(2, 31, 30)
+
+j = 0
+for sid in sidlist:
+    SST = 0
+    SSR = 0
+    SSE = 0
+    print (j)
+    j = j+1
+    indi_dat = dat_30modelling[dat_30modelling['SID']==sid]
+    if len(indi_dat) > 0:
+        parasln2, covarsln2 = curve_fit(func2, list(indi_dat['reOrder']), list(indi_dat['Score']))
+        ymean = np.mean(list(indi_dat['Score']))
+        for x in xs:
+            dat_30modelling.loc[(dat_30modelling['SID']==sid)&(dat_30modelling['reOrder']==x),['a']] = parasln2[0]
+            dat_30modelling.loc[(dat_30modelling['SID']==sid)&(dat_30modelling['reOrder']==x),['b']] = parasln2[1]
+              
+dat_30modelling.to_excel('dat_30modeled_replicate.xlsx')    
+
+#bootstrap among the participants with no less than 30 plays
+dat_30_T2 = dat_30modelling[dat_30modelling['reOrder']==2]
+out_stats = []
+bss = np.linspace(0, 2499, 2500)
+
+age6 = [5,13,18,23,28,33]
+
+for bs in bss:
+    print (bs)
+    bs_stats = []
+    bs_stats.append(bs)
+    age_stats = []
+    ageB_stats = []
+    ageScore2_stats = []
+    for age in age6:
+        sumB = 0
+        sumScore2 = 0
+        BSID = []
+        BSID = list(dat_30_T2['SID'][dat_30_T2['Age']==age])
+        BSsize = len(BSID)
+        bssample = np.random.choice(BSID,BSsize)
+        for bsid in bssample:
+            sumB = sumB + float(dat_30_T2['b'][dat_30_T2['SID']==bsid])
+            sumScore2 = sumScore2 + float(dat_30_T2['Score'][dat_30_T2['SID']==bsid])
+        meanB = sumB / BSsize
+        meanScore2 = sumScore2 / BSsize
+        age_stats.append(age)
+        ageB_stats.append(meanB)
+        ageScore2_stats.append(meanScore2)
+    peakB = age_stats[ageB_stats.index(max(ageB_stats))]
+    peakScore2 = age_stats[ageScore2_stats.index(max(ageScore2_stats))]
+    bs_stats.append(peakB)
+    bs_stats.append(peakScore2)
+    out_stats.append(bs_stats)
+        
+dat_30_bs = pd.DataFrame(out_stats)   
+os.chdir('/nfs/e2/workingshop/xushan/data4shanxu')
+dat_30_bs.columns = ['order','b','score2']
+dat_30_bs.to_excel('bootstrap_30_replicate.xlsx')        

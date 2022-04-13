@@ -1,0 +1,62 @@
+import pandas as pd
+import numpy as np
+import os
+import scipy
+import copy
+from scipy.optimize import curve_fit
+
+
+#please change the directory to where the data is stored, the resultant data file will be saved to the same directory
+os.chdir('/path_to_the_data_file/')
+
+#get the data of the first 20 non-zero scores
+dat_reorder = pd.read_excel('dat_reOrderNozeros_replicate.xlsx')  
+
+sidlist = list(set(dat_reorder['SID'][dat_reorder['reOrder']==21]))
+
+T20_dat_reorder = []
+for i, sid in enumerate(sidlist):
+    if i ==0:
+        T20_dat_reorder = dat_reorder[dat_reorder['SID']==sid][dat_reorder['reOrder']<=21]
+    else:
+        T20_dat_reorder = T20_dat_reorder.append(dat_reorder[dat_reorder['SID']==sid][dat_reorder['reOrder']<=21])
+
+dat_20 = T20_dat_reorder
+dat_20modelling = []
+i = 0
+for sid in sidlist:
+    indi_dat = dat_20[(dat_20['SID']==sid)&(dat_20['reOrder']>1)&(dat_20['reOrder']<=21)]
+    if len(indi_dat) == 20:
+        i = i + 1
+        if i ==1:
+            dat_20modelling = copy.copy(indi_dat)
+        else:
+            dat_20modelling = dat_20modelling.append(indi_dat)
+
+#fitting each partcipant's data to natural logarithmic function
+
+def func2(x, a, b):
+    return a + b * np.log(x-1)
+    
+Nscore = [0] * len(dat_20modelling)
+dat_20modelling.insert(7,'a',Nscore)
+dat_20modelling.insert(7,'b',Nscore)
+
+xs = np.linspace(2, 21, 20)
+
+j = 0
+for sid in sidlist:
+    SST = 0
+    SSR = 0
+    SSE = 0
+    print (j)
+    j = j+1
+    indi_dat = dat_20modelling[dat_20modelling['SID']==sid]
+    if len(indi_dat) > 0:
+        parasln2, covarsln2 = curve_fit(func2, list(indi_dat['reOrder']), list(indi_dat['Score']))
+        ymean = np.mean(list(indi_dat['Score']))
+        for x in xs:
+            dat_20modelling.loc[(dat_20modelling['SID']==sid)&(dat_20modelling['reOrder']==x),['a']] = parasln2[0]
+            dat_20modelling.loc[(dat_20modelling['SID']==sid)&(dat_20modelling['reOrder']==x),['b']] = parasln2[1]
+            
+dat_20modelling.to_excel('dat_20modeled_replicate.xlsx')    
