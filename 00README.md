@@ -14,20 +14,18 @@ Download: https://github.com/shan0903/ThreePiglets2022/blob/main/schoolMR.sav
 
 Instruction for analysis replication:
 
-
 *Note. All the data files and the script files should be saved in the same directory.
 
-*Note. The paths in the GET DATA commands in the .sps files (see comments) need to be changed to the directory containing the scripts.
+*Note. The paths in the GET DATA commands in the .sps files and those in os.chdir in the .txt files (see comments) need to be changed to the directory containing the scripts.
 
 ————————
 
-1. Participants and trial counts in Methods-participants:
-
+Participants and trial counts in Methods-participants:
 Use Data.csv and run script 01.txt in python environment。
 
 ————————
 
-2-3.The developmental trajectory of mental rotation ability: 
+2-3.The developmental trajectory of mental rotation ability:
 
 Run script 02.txt in python environment.
 
@@ -53,8 +51,7 @@ Run 07bootstrapAnalysis in SPSS.
 
 ————————
 
-8. The learning curve of high and low performaners.
-
+The learning curve of high and low performaners.
 Run syntax 08highLowGroups.sps in SPSS.
 
 ————————
@@ -83,7 +80,7 @@ Run S2_3bootstrapAnalysis.sps in SPSS.
 
 ————————
 
-S3. The developmental trajectory of the performance change during training. 
+S3. The developmental trajectory of the performance change during training.
 
 Run S3.txt in python environment.
 
@@ -94,7 +91,4 @@ Run the S3changeIn20.sps in SPSS.
 S4. Descriptive resutls of mental pen-and-paper mental rotation tasks
 
 Run syntax S4schoolMR.sps in SPSS.
-
-
-
 
